@@ -29,6 +29,7 @@ class Google_Signer_P12 extends Google_Signer_Abstract
 {
   // OpenSSL private key resource
   private $privateKey;
+  private $isP12Format = true;
 
   // Creates a new signer from a .p12 file.
   public function __construct($p12, $password)
@@ -37,6 +38,16 @@ class Google_Signer_P12 extends Google_Signer_Abstract
       throw new Google_Exception(
           'The Google PHP API library needs the openssl PHP extension'
       );
+    }
+
+    // If the private key is provided directly, then this isn't in the p12 
+    // format. Different versions of openssl support different p12 formats
+    // and the key from google wasn't being accepted by the version available 
+    // at the time.
+    if (preg_match("#^-----BEGIN RSA PRIVATE KEY-----#", $p12)) {
+       $this->privateKey = $p12;
+       $this->isP12Format = false;
+       return;
     }
 
     // This throws on error
@@ -61,7 +72,7 @@ class Google_Signer_P12 extends Google_Signer_Abstract
 
   public function __destruct()
   {
-    if ($this->privateKey) {
+    if ($this->privateKey && $this->isP12Format) {
       openssl_pkey_free($this->privateKey);
     }
   }
