@@ -43,7 +43,7 @@ class Google_Signer_P12 extends Google_Signer_Abstract
     // format. Different versions of openssl support different p12 formats
     // and the key from google wasn't being accepted by the version available 
     // at the time.
-    if (preg_match("#^-----BEGIN RSA PRIVATE KEY-----#", $p12)) {
+    if (preg_match("#^-----BEGIN (RSA )?PRIVATE KEY-----#", $p12)) {
       $this->privateKey = openssl_pkey_get_private($p12);
     } else {
       // This throws on error
